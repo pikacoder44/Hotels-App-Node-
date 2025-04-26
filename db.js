@@ -7,7 +7,6 @@ mongoose.connect(mongoURL, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   ssl: true, // Force SSL
-  sslValidate: false, // Disable strict SSL validation if needed
 });
 
 const db = mongoose.connection;
