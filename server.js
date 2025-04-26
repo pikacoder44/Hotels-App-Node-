@@ -17,5 +17,6 @@ const menuRoutes = require("./routes/menuRoutes");
 app.use("/person", personRoutes);
 app.use("/menu", menuRoutes);
 
-
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log("App running on port", PORT);
+});
