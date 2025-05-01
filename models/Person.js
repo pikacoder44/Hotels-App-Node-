@@ -43,7 +43,9 @@ const personSchema = new mongoose.Schema({
 });
 
 // BCrypt:
-personSchema.pre("save", async (next) => {
+
+//       Hashing algo when saving user:
+personSchema.pre("save", async function (next) {
   const person = this;
 
   //Hash only when it is new or modified
@@ -55,7 +57,7 @@ personSchema.pre("save", async (next) => {
     const salt = await bcrypt.genSalt(10);
 
     //hash password:
-    const hashedPassword = bcrypt.hash(person.password, salt);
+    const hashedPassword = await bcrypt.hash(person.password, salt);
 
     //Overwrite Plained pass to Hashed one
     person.password = hashedPassword;
@@ -66,15 +68,16 @@ personSchema.pre("save", async (next) => {
   }
 });
 
+//   Compare Password
 personSchema.methods.comparePassword = async function (candidatePassword) {
-  try{
-
-
-  }catch(err){
+  try {
+    // Use Bcrypt to compare the provided password with hashed pass:
+    const isMatch = await bcrypt.compare(candidatePassword, this.password);
+    return isMatch;
+  } catch (err) {
     throw err;
   }
-}
-
+};
 
 // Create Person Model
 
