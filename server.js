@@ -30,7 +30,7 @@ app.get("/", (req, res) => {
 //Import the router files:
 const personRoutes = require("./routes/personRoutes");
 const menuRoutes = require("./routes/menuRoutes");
-app.use("/person", localAuthMiddleware, personRoutes);
+app.use("/person", personRoutes);
 app.use("/menu", menuRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {

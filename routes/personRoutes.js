@@ -2,8 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const Person = require("../models/Person");
+
+const { jwtAuthMiddleware, generateToken } = require("../jwt");
+
 // Post route for Person
-router.post("/", async (req, res) => {
+router.post("/signup", async (req, res) => {
   try {
     const data = req.body; // Assuming req.body contains the new person data
 
@@ -13,15 +16,53 @@ router.post("/", async (req, res) => {
     // Save the new person document to the database
     const response = await newPerson.save();
     console.log("Data Saved");
-    res.status(200).json(response);
+
+    const payload = {
+      id: response.id,
+      username: response.username,
+    };
+    console.log(JSON.stringify(payload));
+    const token = generateToken(payload);
+    console.log("Token is: ", token);
+
+    res.status(200).json({ response: response, token: token });
   } catch (err) {
     console.log("Error: ", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+// Login USer Route:
+router.post("/login", async (req, res) => {
+  try {
+    // Extract username & Password from body:
+    const { username, password } = req.body;
+
+    // Find user by username:
+    const user = await Person.findOne({ username: username });
+
+    // If user doens't exist or password is not right:
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+    // Generate Token:
+    const payload = {
+      id: user.id,
+      username: user.username,
+    };
+
+    const token = generateToken(payload);
+
+    // return token as response:
+    res.json({ token });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Get method to get the person
-router.get("/", async (req, res) => {
+router.get("/", jwtAuthMiddleware, async (req, res) => {
   try {
     const data = await Person.find();
     console.log("Data Fetched");
@@ -31,6 +72,12 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
+
+// Profile Route:
+
+
+
+
 
 //Search person by ID
 router.get("/:workType", async (req, res) => {
